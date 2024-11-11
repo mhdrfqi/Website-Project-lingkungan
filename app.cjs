@@ -36,3 +36,9 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);
 });
+
+app.use(cors({
+    origin: "https://mhdrfqi.github.io/Website-Project-lingkungan/",  // Ganti dengan URL GitHub Pages Anda
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+}));
