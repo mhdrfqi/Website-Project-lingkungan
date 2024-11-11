@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelaporan Sampah</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/gaya.css">
+    <script src="script.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Menambahkan CSS Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+      #map {
+        height: 300px;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      form {
+        max-width: 600px;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flex-auto">
+        
+      <!-- Header untuk Judul -->
+      <div class="flex flex-col"></div>
+      <header>
+        <h2>Formulir Pelaporan Sampah</h2>
+      </header>
+
+      <!-- Formulir Pelaporan Sampah -->
+      <form id="reportForm">
+        <!-- Peta Interaktif -->
+        <label for="map">Pilih Lokasi Sampah:</label>
+        <div id="map"></div>
+
+        <!-- Input Lokasi (koordinat) -->
+        <label for="location">Lokasi (Koordinat):</label>
+        <input type="text" id="location" name="location" placeholder="Masukkan koordinat atau klik pada peta" required>
+
+        <!-- Deskripsi Sampah -->
+        <label for="description">Deskripsi:</label>
+        <textarea id="description" name="description" required></textarea>
+
+        <!-- Upload Foto -->
+        <label for="photo">Unggah Foto (opsional):</label>
+        <input type="file" id="photo" name="photo" accept="image/*">
+
+        <!-- Tombol Kirim -->
+        <button type="submit">Kirim Laporan</button>
+      </form>
+    </div>
+
+  </body>
+  <!-- JavaScript Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    // Inisialisasi Peta
+    var map = L.map('map').setView([-6.200000, 106.816666], 13); // Pusat di Jakarta
+
+    // Menambahkan Layer Peta
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: 'Â© OpenStreetMap'
+    }).addTo(map);
+
+    // Marker untuk Lokasi yang Dipilih
+    var marker;
+
+    // Fungsi untuk membuat atau memindahkan marker ke koordinat yang ditentukan
+    function updateMarker(lat, lng) {
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng]).addTo(map);
+      }
+      map.setView([lat, lng], 13);
+    }
+
+    // Event saat peta diklik
+    map.on('click', function(e) {
+      var lat = e.latlng.lat;
+      var lng = e.latlng.lng;
+
+      // Perbarui posisi marker dan input koordinat
+      updateMarker(lat, lng);
+      document.getElementById('location').value = lat + ", " + lng;
+    });
+
+    // Event listener untuk input koordinat
+    document.getElementById('location').addEventListener('input', function(e) {
+      var coordinates = e.target.value.split(',');
+      if (coordinates.length === 2) {
+        var lat = parseFloat(coordinates[0].trim());
+        var lng = parseFloat(coordinates[1].trim());
+        if (!isNaN(lat) && !isNaN(lng)) {
+          updateMarker(lat, lng); // Perbarui marker jika koordinat valid
+        }
+      }
+    });
+
+    // Mencegah reload page saat form dikirim
+    document.getElementById('reportForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const result = fetch(`http://localhost:3000/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+          location: document.getElementById("location").value,
+          description: document.getElementById("description").value,
+        })
+      })
+
+      result
+      .then(res => {
+        if (res){
+          alert('Laporan dikirim!');
+        }
+      })
+      .catch(err => {
+        alert(`Gagal dikirim`);
+      });
+
+      document.getElementById("reportForm").reset();
+    });
+  </script>
+</html>
