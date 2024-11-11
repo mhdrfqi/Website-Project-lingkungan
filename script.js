@@ -5,13 +5,19 @@ document.getElementById("reportForm").addEventListener("submit", async function 
     const nama = document.getElementById("nama").value;
     const lokasi = document.getElementById("lokasi").value;
     const deskripsi = document.getElementById("deskripsi").value;
+    const corsOptions = {
+        origin: "https://mhdrfqi.github.io",
+        optionsSuccessStatus: 200,
+    };
+    app.use(cors(corsOptions));
+    
 
     // Siapkan data yang akan dikirim
     const data = { nama, lokasi, deskripsi };
 
     try {
         // Kirim data ke server menggunakan POST
-        const response = await fetch("/save", {
+        const response = await fetch("https://mhdrfqi.github.io/Website-Project-lingkungan/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
