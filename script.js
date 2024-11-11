@@ -1,32 +1,29 @@
-// Mencegah reload page saat form dikirim
-document.getElementById('reportForm').addEventListener('submit', function(event) {
-    event.preventDefault();
+// script.js
+document.getElementById("reportForm").addEventListener("submit", async function (e) {
+    e.preventDefault(); // Mencegah form dari submit default
 
-    // Ambil data dari form
-    const location = document.getElementById('location').value;
-    const description = document.getElementById('description').value;
+    const nama = document.getElementById("nama").value;
+    const lokasi = document.getElementById("lokasi").value;
+    const deskripsi = document.getElementById("deskripsi").value;
 
-    // Data untuk dikirim ke server
-    const data = {
-        location: location,
-        description: description
-    };
+    // Siapkan data yang akan dikirim
+    const data = { nama, lokasi, deskripsi };
 
-    // Kirim data ke server menggunakan fetch
-    fetch('https://your-backend-server.com/api/laporan', { // Ganti URL ini dengan alamat backend Anda
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert('Laporan berhasil dikirim!');
-        console.log('Success:', data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan, laporan gagal dikirim.');
-    });
+    try {
+        // Kirim data ke server menggunakan POST
+        const response = await fetch("/save", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        // Tampilkan pesan respons
+        const message = await response.text();
+        document.getElementById("responseMessage").innerText = message;
+    } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("responseMessage").innerText = "Terjadi kesalahan saat mengirim laporan.";
+    }
 });
